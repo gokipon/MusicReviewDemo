@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, createContext } from 'react';
 import { StyleSheet, ImageBackground, View, PanResponder, Text } from 'react-native';
 import { TabOneParamList } from '../types';
 import { RouteProp } from '@react-navigation/native';
@@ -13,12 +13,21 @@ type Props = {
 // 背景画像の読み込み
 const image = require('vooooooooooon/assets/images/background.gif');
 
+type MusicFeelingDataRef = [{ tension: number; elapsedTime: number; }];
+const musicFeelingDataRef = useRef<MusicFeelingDataRef>([{ tension: 0, elapsedTime: 0 }]);
+export const musicFeelingDataContext = createContext(musicFeelingDataRef.current);
+
 export default function TabOneScreen({ route }: Props) {
   // 円の位置を管理する状態として初期値 { x: 0, y: 0 } を設定
   const [circlePosition, setCirclePosition] = useState({ x: 0, y: 0 });
 
+  // 再生ボタンを押した時の時間を保持するための ref を作成
+  const playbackStartTimeRef = useRef(Date.now());
+
   // 前回の位置情報を保持するための ref を作成
   const prevPositionRef = useRef({ x: 0, y: 0 });
+  // 前回の位置情報を保持するための ref を作成
+  const prevElapsedTimeRef = useRef(0);
 
   // パンジェスチャーのイベントハンドラを作成
   const panResponder = PanResponder.create({
@@ -32,12 +41,28 @@ export default function TabOneScreen({ route }: Props) {
         x: prevPosition.x + dx,
         y: prevPosition.y + dy,
       }));
-      // 振動させる
+
+      // // 振動
+      // if (
+      //   //10px毎に振動
+      //   Math.floor(prevPositionRef.current.x / 10) !== Math.floor((prevPositionRef.current.x + dx) / 10) ||
+      //   Math.floor(prevPositionRef.current.y / 10) !== Math.floor((prevPositionRef.current.y + dy) / 10)
+      // ) {
+      //    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      // }
+
+      //気持ちのテンションを求めるalgorithm
       if (
-        Math.floor(prevPositionRef.current.x / 10) !== Math.floor((prevPositionRef.current.x + dx) / 10) ||
-        Math.floor(prevPositionRef.current.y / 10) !== Math.floor((prevPositionRef.current.y + dy) / 10)
+        //10px毎に振動
+        Math.floor(prevPositionRef.current.x / 50) !== Math.floor((prevPositionRef.current.x + dx) / 50) ||
+        Math.floor(prevPositionRef.current.y / 50) !== Math.floor((prevPositionRef.current.y + dy) / 50)
       ) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        const elapsedTime = (Date.now() - playbackStartTimeRef.current) /(1000);
+        const tension = 50 / (elapsedTime - prevElapsedTimeRef.current);
+        
+        musicFeelingDataRef.current.push({ tension: tension, elapsedTime: elapsedTime });
+
+        console.log("tension : "+tension+", elapsedTime : " + elapsedTime)
       }
       // prevPositionを更新する
       prevPositionRef.current.x += dx;

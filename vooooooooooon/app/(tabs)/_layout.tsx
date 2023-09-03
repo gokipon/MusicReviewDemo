@@ -1,7 +1,8 @@
+import React, { useContext } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, Tabs } from 'expo-router';
 import { Pressable, useColorScheme } from 'react-native';
-
+import { musicFeelingDataContext } from './index';
 import Colors from '../../constants/Colors';
 
 /**
@@ -17,7 +18,10 @@ function TabBarIcon(props: {
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
+  const musicFeelingDataRef = useContext(musicFeelingDataContext);
+  
   return (
+    <musicFeelingDataContext.Provider value={musicFeelingDataRef}>
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
@@ -51,5 +55,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </musicFeelingDataContext.Provider>
   );
 }
