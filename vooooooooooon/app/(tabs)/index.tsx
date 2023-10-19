@@ -1,8 +1,9 @@
 import React, { useState, useRef, createContext } from 'react';
-import { StyleSheet, ImageBackground, View, PanResponder, Text } from 'react-native';
+import { StyleSheet, ImageBackground, View, PanResponder, Text, Button } from 'react-native';
 import { TabOneParamList } from '../types';
 import { RouteProp } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
+import {Audio} from 'expo-av';
 
 type TabOneScreenRouteProp = RouteProp<TabOneParamList, 'TabOneScreen'>;
 
@@ -18,6 +19,14 @@ const musicFeelingDataRef = useRef<MusicFeelingDataRef>([{ tension: 0, elapsedTi
 export const musicFeelingDataContext = createContext(musicFeelingDataRef.current);
 
 export default function TabOneScreen({ route }: Props) {
+
+  const musicPath = require('vooooooooooon/assets/sampleMusic/rota.mp3');
+  const sound = new Audio.Sound();
+  sound.loadAsync(musicPath);
+  //音楽再生ハンドラ
+  const onPlayMusicButtonHandler = async() =>{
+    await sound.playAsync();
+  }
   // 円の位置を管理する状態として初期値 { x: 0, y: 0 } を設定
   const [circlePosition, setCirclePosition] = useState({ x: 0, y: 0 });
 
@@ -80,6 +89,7 @@ export default function TabOneScreen({ route }: Props) {
 
   return (
     <View style={styles.container}>
+      <Button title="音楽再生" onPress={onPlayMusicButtonHandler} />
       {/* 背景画像 */}
       <ImageBackground source={image} resizeMode="cover" style={styles.image}></ImageBackground>
       {/* ドラッグ可能な円 */}
